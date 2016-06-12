@@ -1,1 +1,9 @@
-/*you fill this in*/
+body {
+	padding: 0;
+	margin: 0;
+	background-color: cornsilk;
+}
+
+.image {
+	width: 100%;
+}
