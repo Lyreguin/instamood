@@ -23,5 +23,5 @@ $(document).ready(function() {
 
 function handleResponse(response) {
   console.log(response);
-  // add stuff here!
+  
 }
