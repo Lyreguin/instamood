@@ -1,6 +1,13 @@
 var API_DOMAIN = "https://api.instagram.com/v1";
 var RECENT_MEDIA_PATH = "/users/self/media/recent";
+var SENT_URL = "https://twinword-sentiment-analysis.p.mashape.com/analyze/";
 // what do you think a variable in all caps means?
+
+//GLOBAL VARS
+var sentTotal = 0;
+var sentFinal = 0;
+var numScores = 0;
+var wordScore = "";
 
 $(document).ready(function() {
   var token = window.location.hash;
@@ -19,28 +26,8 @@ $(document).ready(function() {
       alert("there has been an error...")
     }
   });
-
-  var sentUrl = "https://community-sentiment.p.mashape.com/text/";
-  $.ajax({
-    type: "GET",
-    url: sentUrl,
-    data: {
-      "X-Mashape-Key":"z5gD9Wpi2lmshS0ubSB2aARWgFLQp1KQoMmjsnikWCk0gUwQuo",
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
-      "txt": "Fuck you fuck you fuck you fuck you"
-    },
-    dataType: "json",
-    success: THIRSTBITCHES,
-    error: function() {
-      alert("NOW WE HUNGRY")
-    }
-  });
 });
 
-function THIRSTBITCHES(response) {
-  console.log(response);
-}
 
 function handleResponse(response) {
   console.log(response);
@@ -50,8 +37,8 @@ function handleResponse(response) {
 
   var popCount = 0;
 
-  var timestamp;
-  var convStamp;
+  var timestamp = 0;
+  var convStamp = 0;
   var week = [0,0,0,0,0,0,0];
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   
@@ -59,9 +46,9 @@ function handleResponse(response) {
   
   var hashCount = 0;
 
-
   //Load Images and Captions
-  for(var i = 0; i < response.data.length; i++)
+  //for(var i = 0; i < response.data.length; i++)
+  $.each( response.data, function(i, output)
   { 
     //Paste Pictures and Captions
      $(".list").append($("<div class='data-item" + i + "'></div>")
@@ -88,36 +75,79 @@ function handleResponse(response) {
     if(response.data[i].caption !== null)
     {
       capCount += response.data[i].caption.text.length; 
+
+      //Sentiment Call
+      $.ajax({
+        type: "GET",
+        url: SENT_URL,
+        headers: {"X-Mashape-Key":"z5gD9Wpi2lmshS0ubSB2aARWgFLQp1KQoMmjsnikWCk0gUwQuo"},
+        data: { text: response.data[i].caption.text },
+        dataType: "json",
+        success: function(response) {
+          sentScore(response, i);
+          },
+        error: function(err) {
+          alert("Error with Sentiment Call");
+          }
+      });
     }
 
     hashCount += response.data[i].tags.length;
-
-
-  }
+  });
 
   //Calculating Stats
-  var ego = (egoCount/response.data.length*100).toFixed(0) + "%";
-  $(".stats").append($("<div class='ego'></div>").html("Ego Score: " + ego + " Of Own Pictures Liked"));
-  
-  var pop = (popCount/response.data.length).toFixed(1);
-   $(".stats").append($("<div class='ego'></div>").html("Popularity: " + pop + " Average Likes Per Pic"));
-  
-  var max = 0;
-  var day = 0;
-  for(var i = 0; i < 7; i++)
+  if(response.data.length > 0)
   {
-    if(week[i] > max)
+    var ego = (egoCount/response.data.length*100).toFixed(0) + "%";
+    $(".stats").append($("<div class='ego'></div>").html("Ego Score: " + ego + " Of Own Pictures Liked"));
+    
+    var pop = (popCount/response.data.length).toFixed(1);
+     $(".stats").append($("<div class='pop'></div>").html("Popularity: " + pop + " Average Likes Per Pic"));
+    
+    var max = 0;
+    var day = 0;
+    for(var i = 0; i < 7; i++)
     {
-      max = week[i];
-      day = i;
+      if(week[i] > max)
+      {
+        max = week[i];
+        day = i;
+      }
     }
-  }
-  $(".stats").append($("<div class='ego'></div>").html("Most Active Day: " + days[day]));
-  
-  var brev = (capCount/response.data.length).toFixed(1);
-  $(".stats").append($("<div class='ego'></div>").html("Brevity: " + brev + " Average Characters Per Pic"));
-  
-  var thirst = (hashCount/response.data.length).toFixed(1);
-  $(".stats").append($("<div class='ego'></div>").html("THIRST: " + thirst + " Average #hashtags Per Pic"));
+    $(".stats").append($("<div class='dayOfWeek'></div>").html("Most Active Day: " + days[day]));
+    
+    var brev = (capCount/response.data.length).toFixed(1);
+    $(".stats").append($("<div class='brev'></div>").html("Brevity: " + brev + " Average Characters Per Pic"));
+    
+    var thirst = (hashCount/response.data.length).toFixed(1);
+    $(".stats").append($("<div class='THIRST'></div>").html("THIRST: " + thirst + " Average #hashtags Per Pic"));
 
+    var sentFinal = (sentTotal/response.data.length).toFixed(3);
+    
+    
+    $(".stats").append($("<div class='score'></div>").html("Overall Sentiment Score: <span class='overSentScore'>" + sentFinal +"</span>"));
+  }
+  else
+  {
+    $(".stats").append($("<div class='noPics'></div>").html("Post some pictures you lard."));
+  }
+}
+
+
+function sentScore(output, index) {
+  $(".data-item" + index).append("<div class='score'>" + 
+    "Sentiment Score = " + output.type + " " + output.score + "</div>");
+  sentTotal += output.score;
+  numScores++;
+  sentFinal = (sentTotal/numScores).toFixed(3);
+  if(sentFinal>0)
+  {
+    wordScore = " Positive ";
+  }
+  else if(sentFinal<0)
+  {
+    wordScore = " Negative ";
+  }
+  else wordScore = " Neutral ";
+  $(".overSentScore").html(wordScore + sentFinal);
 }
