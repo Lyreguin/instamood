@@ -1,9 +1,45 @@
 body {
 	padding: 0;
 	margin: 0;
+}
+
+.centerthingy {
 	background-color: cornsilk;
+	font-size: 1.3em;
+	font-family: 'Arvo', serif;
+}
+
+.side-left {
+	background: linear-gradient(to bottom, cornsilk 75%, white 100%);
+	height:1000px;
+}
+
+.side-right {
+	 background: linear-gradient(to bottom, cornsilk 75%, white 100%);
+	 height:1000px;
+}
+
+.header {
+	font-family: 'Lobster', cursive;
+	font-size: 5em;
+}
+
+.stats {
+	margin-left: 40px;
+}
+
+.stat-head {
+	font-weight: bold;
+}
+
+.centerthingy div {
+	margin-bottom: 10px;
 }
 
 .image {
 	width: 100%;
+	margin-top: 80px;
+	margin-bottom: 40px;
+	border: 9px solid white;
+	border-radius: 3px
 }
