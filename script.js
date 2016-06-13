@@ -34,7 +34,6 @@ $(document).ready(function() {
 
 
 function handleResponse(response) {
-  console.log(response);
 
   //Create Stats
   var egoCount = 0;
@@ -178,7 +177,6 @@ function callClarifai(image)
 
 function analyze(clarObj)
 {
-  console.log(clarObj);
   for(var i = 0; i < clarObj.results[0].result.tag.classes.length; i++)
   {
     var tag = clarObj.results[0].result.tag.classes[i];
@@ -200,7 +198,6 @@ function analyze(clarObj)
   }
 
   var check = $.inArray(result, popTags);
-  console.log(check);
   if(check === -1)
   {
     popTags.push(result);
@@ -211,7 +208,6 @@ function analyze(clarObj)
     popTags.shift();
   }
 
-  console.log(popTags);
 
   $(".tags").html("<span class='stat-head'>Most Popular Tags</span>: " 
     + popTags[0] + ", " + popTags[1] + ", " + popTags[2]);
